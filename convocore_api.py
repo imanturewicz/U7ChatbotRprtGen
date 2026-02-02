@@ -8,6 +8,7 @@ class ConvocoreClient:
             "Content-Type": "application/json"
         }
 
+    # API call to fetch a single page of conversations
     def _fetch_page(self, agent_id, page, limit):
         url = f"{self.base_url}/agents/{agent_id}/convos"
         params = {"page": page, "limit": limit}
@@ -19,7 +20,7 @@ class ConvocoreClient:
             print(f"❌ [Convocore] Error on page {page}: {e}")
             return []
 
-    def fetch_conversations_generator(self, agent_id, batch_size=50):
+    def fetch_conversations_generator(self, agent_id, batch_size=100):
         """Yields conversations one-by-one, handling pagination automatically."""
         page = 1
         while True:

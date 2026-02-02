@@ -55,7 +55,7 @@ latex_env = jinja2.Environment(
 
 modules.generate_pdf_from_template(
     env=latex_env,
-    template_name='reportTemplate.tex',
+    template_name='reportTemplate.tex.j2',
     context=context,
     output_dir=script_dir,
     output_filename="monthlyReport"
