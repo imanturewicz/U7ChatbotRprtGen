@@ -5,14 +5,14 @@ from datetime import datetime, timezone
 import voiceflow_api
 import convocore_api
 import modules
-import secrects
+import secrets
 
 # --- CONFIGURATION ---
-VF_API_KEY = secrects.VOICEFLOW_API_KEY
-VF_PROJECT_ID = secrects.VOICEFLOW_PROJECT_ID
+VF_API_KEY = secrets.VOICEFLOW_API_KEY
+VF_PROJECT_ID = secrets.VOICEFLOW_PROJECT_ID
 
-CONVO_API_KEY = secrects.CONVOCORE_API_KEY
-CONVO_AGENT_ID = secrects.CONVOCORE_AGENT_ID
+CONVO_API_KEY = secrets.CONVOCORE_API_KEY
+CONVO_AGENT_ID = secrets.CONVOCORE_AGENT_ID
 
 #                       YYYY, m, D, h, M, s, UTC
 REPORT_START = datetime(2026, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
