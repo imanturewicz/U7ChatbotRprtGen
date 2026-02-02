@@ -1,7 +1,6 @@
 import requests
 import json
 
-# CHANGE: We now accept start_date and end_date as arguments
 def get_voiceflow_users(api_key, project_id, start_date, end_date):
     url = "https://analytics-api.voiceflow.com/v2/query/usage"
     
