@@ -1,4 +1,5 @@
 import os
+import sys
 import jinja2
 from datetime import datetime, timezone
 
@@ -8,21 +9,43 @@ import modules
 import secrets
 
 # --- CONFIGURATION ---
+OPENAI_KEY = secrets.OPENAI_API_KEY
+
 VF_API_KEY = secrets.VOICEFLOW_API_KEY
 VF_PROJECT_ID = secrets.VOICEFLOW_PROJECT_ID
+VF_ENV_ID = secrets.VOICEFLOW_ENVIRONMENT_ID
+vf_client = voiceflow_api.VoiceflowClient(VF_API_KEY, VF_PROJECT_ID)
 
 CONVO_API_KEY = secrets.CONVOCORE_API_KEY
 CONVO_AGENT_ID = secrets.CONVOCORE_AGENT_ID
 
-#                       YYYY, m, D, h, M, s, UTC
+#                       YYYY, M, D, h, m, s, UTC
 REPORT_START = datetime(2026, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
 REPORT_END   = datetime(2026, 2, 1, 0, 0, 0, tzinfo=timezone.utc)
+# REPORT_START = datetime(2026, 2, 1, 0, 0, 0, tzinfo=timezone.utc)
+# REPORT_END   = datetime(2026, 3, 1, 0, 0, 0, tzinfo=timezone.utc)
 
 print(f"🚀 Generating Report: {REPORT_START.date()} to before {REPORT_END.date()}")
 
 # --- FETCH VOICEFLOW DATA ---
-vf_users = voiceflow_api.get_voiceflow_users(VF_API_KEY, VF_PROJECT_ID, REPORT_START, REPORT_END)
+vf_users = vf_client.get_unique_users(REPORT_START, REPORT_END)
 print(f"✅ [Voiceflow] Users found: {vf_users}")
+
+print("Downloading transcripts...")
+transcripts_list = list(vf_client.fetch_transcripts(REPORT_START, REPORT_END, VF_ENV_ID))
+print(f"✅ Downloaded {len(transcripts_list)} transcripts.")
+
+voiceflow_api.end_active_transcripts(vf_client, transcripts_list)
+
+sensible_transcripts = modules.filter_sensible_transcripts(transcripts_list)
+print(f"✅ Filtered down to {len(sensible_transcripts)} sensownych transcripts.")
+
+topic_counts = modules.process_voiceflow_categories(sensible_transcripts)
+print("\n📊 FINAL CATEGORIZATION FOR REPORT:")
+for cat, count in topic_counts.items():
+    print(f"   📂 {cat}: {count}")
+
+sys.exit("🛑 STOPPING SCRIPT FOR TESTING")
 
 # --- FETCH CONVOCORE DATA ---
 convo_goodExample_tags = convocore_api.getConvocoreTagsNo(CONVO_API_KEY, CONVO_AGENT_ID, REPORT_START, REPORT_END, "Good Example")
