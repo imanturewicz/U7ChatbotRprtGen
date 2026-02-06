@@ -45,7 +45,7 @@ print("\n📊 FINAL CATEGORIZATION FOR REPORT:")
 for cat, count in topic_counts.items():
     print(f"   📂 {cat}: {count}")
 
-sys.exit("🛑 STOPPING SCRIPT FOR TESTING")
+# sys.exit("STOPPING SCRIPT FOR TESTING")
 
 # --- FETCH CONVOCORE DATA ---
 convo_goodExample_tags = convocore_api.getConvocoreTagsNo(CONVO_API_KEY, CONVO_AGENT_ID, REPORT_START, REPORT_END, "Good Example")
@@ -60,8 +60,10 @@ context = {
     "period_start": REPORT_START.strftime("%Y-%m-%d"),
     "period_end": REPORT_END.strftime("%Y-%m-%d"),
     "unique_users": vf_users,
+    "topic_counts": topic_counts,
     "num_good_examples": convo_goodExample_tags,
-    "num_bad_examples": convo_badExample_tags
+    "num_bad_examples": convo_badExample_tags,
+    "sensible_count": len(sensible_transcripts)
 }
 
 latex_env = jinja2.Environment(

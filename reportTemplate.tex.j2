@@ -1,7 +1,11 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
 \usepackage{geometry}
-\usepackage{xcolor} % For colors
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{pgf-pie}
+\usetikzlibrary{shadows} % <--- REQUIRED FOR SHADOWS
 
 \title{\VAR{ title_var }}
 \date{\VAR{ report_date }}
@@ -15,26 +19,87 @@
 \textbf{Project ID:} \texttt{\VAR{ project_id }} \\
 \textbf{System Status:} \VAR{ status }
 
+% --- IMPROVED TRAFFIC SECTION ---
 \section{Traffic Analysis}
+
 \begin{center}
-    \huge
-    Total Unique Interactions (Last 30 Days): \\
-    \vspace{0.5cm}
-    \textbf{\textcolor{blue}{\VAR{ unique_users }}}
+    % Box 1: Unique Users
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \large Total Unique Users \\ (Last 30 Days)
+        \vspace{0.3cm} \\
+        \huge \textbf{\textcolor{blue}{\VAR{ unique_users }}}
+    \end{minipage}
+    \hfill
+    % Box 2: Sensible Conversations
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \large Sensible Conversations \\ (Filtered)
+        \vspace{0.3cm} \\
+        \huge \textbf{\textcolor{teal}{\VAR{ sensible_count }}}
+    \end{minipage}
 \end{center}
 
 \vspace{1cm}
+\hrule
+\vspace{1cm}
 
 \section{Conversation Topics}
-\BLOCK{ if top_tags }
-    Here are the top tags from the last month:
-    \begin{itemize}
-        \BLOCK{ for tag, count in top_tags }
-            \item \textbf{\VAR{ tag }}: \VAR{ count } occurrences
-        \BLOCK{ endfor }
-    \end{itemize}
+
+\BLOCK{ if topic_counts }
+
+    \begin{center}
+        \begin{tikzpicture}
+            \pie[
+                sum=auto,
+                radius=3,
+                text=legend,
+                hide number,
+                explode=0.1,
+                style={drop shadow},
+                color={blue!60, cyan!50, orange!60, green!50, red!60, purple!50, yellow!60, magenta!50, gray!50}
+            ]{%
+                \BLOCK{ for cat, count in topic_counts.items() }
+                    \VAR{ count }/\VAR{ cat } (\textbf{\VAR{ count }})\BLOCK{ if not loop.last },\BLOCK{ endif }%
+                \BLOCK{ endfor }
+            }
+        \end{tikzpicture}
+    \end{center}
+    
+    \vspace{0.5cm}
+    \begin{center}
+        \small \textit{*Legend shows category name and (total occurrences).}
+    \end{center}
+
 \BLOCK{ else }
-    \textit{No tags found (or API connection failed).}
+    \begin{center}
+        \textit{No conversation tags found for this period.}
+    \end{center}
 \BLOCK{ endif }
+
+\section{Quality Assurance}
+
+\begin{center}
+    \begin{tikzpicture}
+        \pie[
+            sum=auto,
+            radius=3,
+            text=legend,
+            hide number,
+            explode=0.1,
+            style={drop shadow},
+            color={green!60, gray!50, red!60} 
+        ]{%
+            \VAR{ num_good }/Poprawne (\textbf{\VAR{ num_good }}),
+            \VAR{ sensible_count - num_good - num_bad }/Neutralne (\textbf{\VAR{ sensible_count - num_good - num_bad }}),
+            \VAR{ num_bad }/Błędne (\textbf{\VAR{ num_bad }})
+        }
+    \end{tikzpicture}
+\end{center}
+
+\vspace{0.5cm}
+\begin{center}
+    \small \textit{Breakdown of AI accuracy based on flagged conversations.}
+\end{center}
 
 \end{document}

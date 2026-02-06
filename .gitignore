@@ -12,3 +12,8 @@ venv/
 # Ignore documents
 *.pdf
 Inne_tematy_konweracji.txt
+
+# Ignore pgf-pie folder
+pgf-pie/
+
+.vscode/
