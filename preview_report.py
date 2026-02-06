@@ -1,60 +1,70 @@
+import sys
 import jinja2
 import os
 import subprocess
+import modules
+from datetime import datetime
 
 # 1. SETUP THE JINJA ENVIRONMENT
 template_loader = jinja2.FileSystemLoader(searchpath="./")
 template_env = jinja2.Environment(
     block_start_string=r'\BLOCK{',
-    block_end_string=r'}',
+    block_end_string='}',           # Removed 'r' prefix to match main
     variable_start_string=r'\VAR{',
-    variable_end_string=r'}',
+    variable_end_string='}',        # Removed 'r' prefix to match main
     comment_start_string=r'\#{',
-    comment_end_string=r'}',
-    loader=template_loader,
-    autoescape=False
+    comment_end_string='}',         # Removed 'r' prefix to match main
+    trim_blocks=True,               # <--- THIS WAS MISSING
+    autoescape=False,
+    loader=template_loader
 )
 
 # 2. DEFINE FAKE/TEST DATA (Matches your real variables)
 context = {
-    "title_var": "PREVIEW REPORT",
-    "report_date": "2026-02-06",
-    "project_id": "TEST_PROJECT_ID",
-    "status": "Preview Mode",
-    "unique_users": 1250,
+    # Header Data
+    "title_var": "Raport z Działania Chatbota U7 AI",
+    "period": "1 Grudnia - 31 Grudnia 2025",
+    "period_short": "01.12 - 31.12", # Used in the metric subheader
     
-    # Traffic & Filtering
-    "sensible_count": 850,
-    "num_good": 700,
-    "num_bad": 50,
-    # Neutral is calculated in template: 850 - 700 - 50 = 100
+    # Section 1: Overview Text (The text paragraph from your screenshot)
+    "overview_text": "Kolejny miesiąc działania chatbota U7 przebiegł pomyślnie",
+
+    # Key Metrics Table Data
+    "unique_users": "120",  # Formatted as string for spacing if needed
+    "interactions": "230",
+    "sensible_count": 200,
+    "avg_duration": "100 sekund",
+    "firm_forms": 5,
+    "bday_forms": 0,
     
-    # Topic Data for Pie Chart
+    # Data for Pie Charts (Keeping these for later sections)
+    "num_good": 190,
+    "num_bad": 5,
+    # Neutral calculated in template
+    
+    "topics_text": "Najczęstszymi zapytaniami pozostają te dotyczące rezerwacji oraz promocji.",
     "topic_counts": {
-        "Pytania o rezerwacje i promocje": 450,
+        "Pytania o rezerwacje": 450,
         "Godziny Otwarcia": 150,
         "Cennik": 100,
         "Urodziny": 50,
         "Inne": 100
-    }
+    },
+
+    "quality_text": "Jakość odpowiedzi chatbota utrzymuje się na wysokim poziomie.",
+
+    "generation_date": datetime.now().strftime("%d.%m.%Y"), 
+    "author_name": "Ignacy Manturewicz"
 }
 
-# 3. RENDER THE TEMPLATE
-template_file = "reportTemplate.tex.j2" # <--- Your template filename
-template = template_env.get_template(template_file)
-output_tex = "preview_output.tex"
+script_dir = os.path.dirname(os.path.abspath(__file__))
 
-with open(output_tex, "w", encoding="utf-8") as f:
-    f.write(template.render(context))
+modules.generate_pdf_from_template(
+    env=template_env,
+    template_name='reportTemplate.tex.j2',
+    context=context,
+    output_dir=script_dir,
+    output_filename="preview_report"
+)
 
-# 4. COMPILE TO PDF (Runs pdflatex automatically)
-print("Compiling PDF...")
-try:
-    # Run pdflatex twice to ensure charts/layout stabilize
-    subprocess.run(["pdflatex", "-interaction=nonstopmode", output_tex], check=True, stdout=subprocess.DEVNULL)
-    subprocess.run(["pdflatex", "-interaction=nonstopmode", output_tex], check=True, stdout=subprocess.DEVNULL)
-    print(f"✅ Success! Generated {output_tex.replace('.tex', '.pdf')}")
-except subprocess.CalledProcessError:
-    print("❌ Error during LaTeX compilation. Check 'preview_output.log' for details.")
-except FileNotFoundError:
-    print("❌ Error: 'pdflatex' command not found. Do you have a LaTeX distribution installed?")
+# sys.exit("STOPPING SCRIPT FOR TESTING")

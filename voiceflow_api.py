@@ -13,9 +13,9 @@ class VoiceflowClient:
             "content-type": "application/json"
         }
 
-    def get_unique_users(self, start_date, end_date):
+    def get_unique_users__or_interactions(self, start_date, end_date, metric="unique_users"):
         """
-        Fetches unique user count using Analytics API v2.
+        Fetches unique user count or interaction count using Analytics API v2.
         """
         url = "https://analytics-api.voiceflow.com/v2/query/usage"
         fmt = "%Y-%m-%dT%H:%M:%S.000Z"
@@ -25,12 +25,12 @@ class VoiceflowClient:
         next_cursor = None
         MAX_LOOPS = 10 
         
-        print(f"📊 [Voiceflow] Fetching Unique Users...")
+        print(f"📊 [Voiceflow] Fetching {metric}...")
 
         for i in range(MAX_LOOPS):
             payload = {
                 "data": {
-                    "name": "unique_users",
+                    "name": metric,
                     "filter": {
                         "projectID": self.project_id,
                         "limit": 500,

@@ -1,51 +1,104 @@
-\documentclass{article}
+\documentclass[12pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{geometry}
+\usepackage[a4paper, margin=1in]{geometry}
 \usepackage{xcolor}
 \usepackage{tikz}
 \usepackage{pgf-pie}
-\usetikzlibrary{shadows} % <--- REQUIRED FOR SHADOWS
+\usepackage{array} % For better table formatting
+\usetikzlibrary{shadows}
 
-\title{\VAR{ title_var }}
-\date{\VAR{ report_date }}
-\author{Automated Analytics}
+% Define custom colors if needed
+\definecolor{graytext}{RGB}{100, 100, 100}
+
+% Increase row height for the table to look like the screenshot
+\renewcommand{\arraystretch}{1.5}
+
+\setcounter{secnumdepth}{0} % Disable section numbering
+
+% --- FOOTER CONFIGURATION (fancyhdr) ---
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{} % Clears all default headers and footers
+
+% Remove the horizontal rule (line) in header and footer
+% (Matches your "0 width border" requirement)
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt} 
+
+% Set the footer content
+% L = Left, C = Center, R = Right
+\fancyfoot[L]{Ignacy Manturewicz}
+\fancyfoot[C]{\hspace{3cm} Raport z Działania Chatbota U7 AI, \VAR{ generation_date }}
+\fancyfoot[R]{\thepage}
 
 \begin{document}
 
-\maketitle
-
-\section{Project Overview}
-\textbf{Project ID:} \texttt{\VAR{ project_id }} \\
-\textbf{System Status:} \VAR{ status }
-
-% --- IMPROVED TRAFFIC SECTION ---
-\section{Traffic Analysis}
-
+% --- TITLE SECTION ---
 \begin{center}
-    % Box 1: Unique Users
-    \begin{minipage}{0.45\textwidth}
-        \centering
-        \large Total Unique Users \\ (Last 30 Days)
-        \vspace{0.3cm} \\
-        \huge \textbf{\textcolor{blue}{\VAR{ unique_users }}}
-    \end{minipage}
-    \hfill
-    % Box 2: Sensible Conversations
-    \begin{minipage}{0.45\textwidth}
-        \centering
-        \large Sensible Conversations \\ (Filtered)
-        \vspace{0.3cm} \\
-        \huge \textbf{\textcolor{teal}{\VAR{ sensible_count }}}
-    \end{minipage}
+    \Huge \textbf{\VAR{ title_var }}
 \end{center}
 
+\vspace{0.2cm}
+
+% Subtitle aligned left in gray
+\noindent \large \textcolor{graytext}{Okres raportowania: \VAR{ period }}
+
+\vspace{0.5cm}
+
+% --- TABLE OF CONTENTS ---
+% This generates automatically based on \section{} tags
+\makeatletter
+\@starttoc{toc}
+\makeatother
+%\renewcommand{\contentsname}{Spis treści}
+
 \vspace{1cm}
-\hrule
+\hrule % Horizontal line
 \vspace{1cm}
 
-\section{Conversation Topics}
+% --- SECTION 1: OVERVIEW ---
+\section{Przegląd ogólny i kluczowe statystyki}
 
+% The paragraph text passed from python
+\noindent \VAR{ overview_text }
+
+\vspace{0.8cm}
+
+% Small bold heading
+\noindent \textbf{Kluczowe metryki:}
+
+\vspace{0.3cm}
+
+% --- METRICS TABLE ---
+\noindent
+\begin{tabular}{|p{0.65\textwidth}|p{0.3\textwidth}|}
+    \hline
+    Liczba Unikalnych Użytkowników & \VAR{ unique_users } \\
+    \hline
+    Liczba Wszystkich Interakcji & \VAR{ interactions } \\
+    \hline
+    Liczba Sensownych Konwersacji & \VAR{ sensible_count } \\
+    \hline
+    Średni czas trwania konwersacji & \VAR{ avg_duration } \\
+    \hline
+    Obsłużone formularze ``firmówek'' & \VAR{ firm_forms } \\
+    \hline
+    Obsłużone formularze ``urodzinek'' & \VAR{ bday_forms } \\
+    \hline
+\end{tabular}
+
+% --- PLACEHOLDERS FOR FUTURE SECTIONS (Translated) ---
+\newpage % Force a new page for this section (optional, remove if you want it continuous)
+
+\section{Analiza zapytań użytkowników}
+
+% 1. The Text Field
+\noindent \VAR{ topics_text }
+
+\vspace{1cm}
+
+% 2. The Pie Chart logic
 \BLOCK{ if topic_counts }
 
     \begin{center}
@@ -53,53 +106,70 @@
             \pie[
                 sum=auto,
                 radius=3,
-                text=legend,
-                hide number,
-                explode=0.1,
+                text=legend,      % Puts text in a legend side-box
+                hide number,      % Hides percentages inside the pie (cleaner)
+                explode=0.2,      % Slightly separates the slices
                 style={drop shadow},
-                color={blue!60, cyan!50, orange!60, green!50, red!60, purple!50, yellow!60, magenta!50, gray!50}
+                color={blue!60, cyan!50, orange!60, green!50, red!60, purple!50, magenta!50, yellow!50}, % Add more colors if you have more categories
+                font=\small  % <--- DODAJ TĘ LINIJKĘ (możesz też użyć \scriptsize lub \tiny)
             ]{%
-                \BLOCK{ for cat, count in topic_counts.items() }
+                \BLOCK{ for cat, count in topic_counts.items() }%
                     \VAR{ count }/\VAR{ cat } (\textbf{\VAR{ count }})\BLOCK{ if not loop.last },\BLOCK{ endif }%
-                \BLOCK{ endfor }
+                \BLOCK{ endfor }%
             }
         \end{tikzpicture}
     \end{center}
     
     \vspace{0.5cm}
     \begin{center}
-        \small \textit{*Legend shows category name and (total occurrences).}
+        \small \textit{*Wykres przedstawia rozkład tematów rozmów użytkowników.}
     \end{center}
 
 \BLOCK{ else }
     \begin{center}
-        \textit{No conversation tags found for this period.}
+        \textit{Brak danych o tematach rozmów w tym okresie.}
     \end{center}
 \BLOCK{ endif }
 
-\section{Quality Assurance}
+%=======================================================================
+\section{Analiza poprawności}
+
+% --- CALCULATE PERCENTAGES (Python/Jinja logic) ---
+\BLOCK{ set neutral_count = sensible_count - num_good - num_bad }
+\BLOCK{ set pct_good = (num_good / sensible_count * 100) | round(1) }
+\BLOCK{ set pct_neutral = (neutral_count / sensible_count * 100) | round(1) }
+\BLOCK{ set pct_bad = (num_bad / sensible_count * 100) | round(1) }
+
+\noindent \VAR{ quality_text }
+
+\vspace{1cm}
+
+% --- DEFINE COLORS ---
+\definecolor{royalblue}{RGB}{65, 105, 225}  % Brighter, nicer blue
+\definecolor{softgray}{RGB}{220, 220, 220}  % Light Gray
+\definecolor{softred}{RGB}{219, 88, 86}     % Soft Red
 
 \begin{center}
     \begin{tikzpicture}
         \pie[
-            sum=auto,
+            sum=auto,           % Calculates angles based on total
             radius=3,
-            text=legend,
-            hide number,
-            explode=0.1,
+            text=legend,        % Puts labels in the legend
+            hide number,        % CLEANS THE CHART (No text on slices)
+            explode=0.2,
             style={drop shadow},
-            color={green!60, gray!50, red!60} 
+            color={royalblue, softgray, softred} 
         ]{%
-            \VAR{ num_good }/Poprawne (\textbf{\VAR{ num_good }}),
-            \VAR{ sensible_count - num_good - num_bad }/Neutralne (\textbf{\VAR{ sensible_count - num_good - num_bad }}),
-            \VAR{ num_bad }/Błędne (\textbf{\VAR{ num_bad }})
+            \VAR{ num_good }/Poprawne (\textbf{\VAR{ pct_good }\%}),%
+            \VAR{ neutral_count }/Neutralne (\textbf{\VAR{ pct_neutral }\%}),%
+            \VAR{ num_bad }/Błędne (\textbf{\VAR{ pct_bad }\%})%
         }
     \end{tikzpicture}
 \end{center}
 
 \vspace{0.5cm}
 \begin{center}
-    \small \textit{Breakdown of AI accuracy based on flagged conversations.}
+    \small \textit{*Wykres przedstawia procentowy udział jakości odpowiedzi.}
 \end{center}
 
 \end{document}

@@ -89,7 +89,7 @@ def process_voiceflow_categories(transcripts_list):
     """
     1. Extracts 'Kategoryzacja' value and 'reason' from Voiceflow transcripts.
     2. Merges top 3 specific categories into "Pytania o rezerwacje i promocje".
-    3. Selects the Top 8 remaining specific categories.
+    3. Selects the Top X remaining specific categories.
     4. Moves everything else (plus explicit 'Inne') to a catch-all bucket.
     5. Saves reasons for the 'Inne' bucket to a text file.
     """
@@ -156,7 +156,7 @@ def process_voiceflow_categories(transcripts_list):
     
     final_report_data[MEGA_GROUP_NAME] = mega_count
 
-    # 2. Process Candidates for Top 8
+    # 2. Process Candidates for Top X
     # We filter out the Mega Keys and "Inne" (handled separately)
     candidates = []
     for cat, count in raw_counts.items():
@@ -166,12 +166,12 @@ def process_voiceflow_categories(transcripts_list):
     # Sort by count descending
     candidates.sort(key=lambda x: x[1], reverse=True)
 
-    # Split into Top 8 and Leftovers
-    split = 8
+    # Split into Top X and Leftovers
+    split = 6
     top_cats = candidates[:split]
     leftovers = candidates[split:]
 
-    # Add Top 8 to report
+    # Add Top X to report
     for cat, count in top_cats:
         final_report_data[cat] = count
 
@@ -198,7 +198,7 @@ def process_voiceflow_categories(transcripts_list):
     if inne_bucket_reasons:
         with open(filename, "w", encoding="utf-8") as f:
             f.write(f"=== SZCZEGÓŁY KATEGORII 'INNE' (Łącznie: {total_inne_count}) ===\n")
-            f.write("Tutaj znajdują się rozmowy z kategorii 'Inne' oraz kategorie, które nie zmieściły się w TOP 8.\n\n")
+            f.write(f"Tutaj znajdują się rozmowy z kategorii 'Inne' oraz kategorie, które nie zmieściły się w TOP {split}.\n\n")
             for line in inne_bucket_reasons:
                 f.write(f"- {line}\n")
         print(f"💾 Saved {len(inne_bucket_reasons)} reasons to '{filename}'")
@@ -208,3 +208,32 @@ def process_voiceflow_categories(transcripts_list):
         print("ℹ️ File created (empty).")
 
     return final_report_data
+
+def format_report_range(start_dt, end_dt):
+    # Get basic parts
+    polish_months_genitive = {
+        1: "Stycznia",
+        2: "Lutego",
+        3: "Marca",
+        4: "Kwietnia",
+        5: "Maja",
+        6: "Czerwca",
+        7: "Lipca",
+        8: "Sierpnia",
+        9: "Września",
+        10: "Października",
+        11: "Listopada",
+        12: "Grudnia"
+    }
+    start_day = start_dt.day
+    start_month = polish_months_genitive[start_dt.month]
+    end_day = end_dt.day
+    end_month = polish_months_genitive[end_dt.month]
+    
+    # Logic: Check if years are the same
+    if start_dt.year == end_dt.year:
+        # Same year: "1 Grudnia - 31 Grudnia 2025"
+        return f"{start_day} {start_month} - {end_day} {end_month} {end_dt.year}"
+    else:
+        # Different years: "1 Grudnia 2025 - 31 Stycznia 2026"
+        return f"{start_day} {start_month} {start_dt.year} - {end_day} {end_month} {end_dt.year}"
