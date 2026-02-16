@@ -1,7 +1,7 @@
 import os
 import sys
 import jinja2
-from datetime import datetime
+from datetime import datetime, time
 from zoneinfo import ZoneInfo
 
 import voiceflow_api
@@ -23,8 +23,8 @@ CONVO_AGENT_ID = secrets.CONVOCORE_AGENT_ID
 
 #Set the report period as needed
 #                       YYYY, M, D, h, m, s, UTC
-REPORT_START = datetime(2026, 2, 1, 0, 0, 0, tzinfo=ZoneInfo("Europe/Warsaw"))
-REPORT_END   = datetime(2026, 2, 14, 23, 59, 59, tzinfo=ZoneInfo("Europe/Warsaw"))
+REPORT_START = datetime.combine(config.START_DATE, time(0, 0, 0), tzinfo=ZoneInfo("Europe/Warsaw"))
+REPORT_END   = datetime.combine(config.END_DATE, time(23, 59, 59), tzinfo=ZoneInfo("Europe/Warsaw"))
 
 print(f"🚀 Generating Report: {REPORT_START.date()} to before {REPORT_END.date()}")
 
