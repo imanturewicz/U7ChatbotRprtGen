@@ -21,9 +21,10 @@ vf_client = voiceflow_api.VoiceflowClient(VF_API_KEY, VF_PROJECT_ID)
 CONVO_API_KEY = secrets.CONVOCORE_API_KEY
 CONVO_AGENT_ID = secrets.CONVOCORE_AGENT_ID
 
+#Set the report period as needed
 #                       YYYY, M, D, h, m, s, UTC
-REPORT_START = datetime(2026, 1, 1, 0, 0, 0, tzinfo=ZoneInfo("Europe/Warsaw"))
-REPORT_END   = datetime(2026, 1, 31, 23, 59, 59, tzinfo=ZoneInfo("Europe/Warsaw"))
+REPORT_START = datetime(2026, 2, 1, 0, 0, 0, tzinfo=ZoneInfo("Europe/Warsaw"))
+REPORT_END   = datetime(2026, 2, 14, 23, 59, 59, tzinfo=ZoneInfo("Europe/Warsaw"))
 
 print(f"🚀 Generating Report: {REPORT_START.date()} to before {REPORT_END.date()}")
 
@@ -39,7 +40,7 @@ print("Downloading transcripts...")
 transcripts_list = list(vf_client.fetch_transcripts(REPORT_START, REPORT_END, VF_ENV_ID))
 print(f"✅ Downloaded {len(transcripts_list)} transcripts.")
 
-# voiceflow_api.end_active_transcripts(vf_client, transcripts_list) # If transcripts are still stuck
+voiceflow_api.end_active_transcripts(vf_client, transcripts_list) # If transcripts are still stuck
 
 sensible_transcripts = modules.filter_sensible_transcripts(transcripts_list)
 print(f"✅ Filtered down to {len(sensible_transcripts)} sensownych transcripts.")
@@ -52,6 +53,7 @@ for cat, count in topic_counts.items():
 # --- FETCH CONVOCORE DATA ---
 convo_goodExample_tags = convocore_api.getConvocoreTagsNo(CONVO_API_KEY, CONVO_AGENT_ID, REPORT_START, REPORT_END, "Good Example")
 convo_badExample_tags = convocore_api.getConvocoreTagsNo(CONVO_API_KEY, CONVO_AGENT_ID, REPORT_START, REPORT_END, "Bad Example")
+convo_Neutral_tags = convocore_api.getConvocoreTagsNo(CONVO_API_KEY, CONVO_AGENT_ID, REPORT_START, REPORT_END, "Neutral")
 
 # --- GENERATE PDF ---
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -68,7 +70,8 @@ context = {
     # Key Metrics Table Data
     "unique_users": vf_users,  # Formatted as string for spacing if needed
     "interactions": vf_interactions,
-    "sensible_count": len(sensible_transcripts),
+    #"sensible_count": len(sensible_transcripts),       #legacy metric, can be removed if we fully switch to convo tags as proxy for sensible interactions
+    "sensible_count": convo_goodExample_tags + convo_badExample_tags + convo_Neutral_tags, # Using convo tags as proxy for sensible interactions
     "avg_duration": config.avg_duration,
     "firm_forms": config.firm_forms,
     "bday_forms": config.bday_forms,
@@ -76,6 +79,7 @@ context = {
     # Data for Pie Charts (Keeping these for later sections)
     "num_good": convo_goodExample_tags,
     "num_bad": convo_badExample_tags,
+    "num_neutral": convo_Neutral_tags,
     # Neutral calculated in template
     
     "topics_text": config.topics_text,

@@ -13,9 +13,22 @@ venv/
 # Ignore documents
 *.pdf
 Inne_tematy_konweracji.txt
-*.toc
+preview_report.tex
+monthlyReport.tex
 
 # Ignore pgf-pie folder
 pgf-pie/
 
 .vscode/
+
+# --- LaTeX Build Artifacts ---
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.dvi
+*.bbl
+*.blg

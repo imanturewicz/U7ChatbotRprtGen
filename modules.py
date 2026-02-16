@@ -19,6 +19,10 @@ def generate_pdf_from_template(env, template_name, context, output_dir, output_f
     try:
         template = env.get_template(template_name)
         rendered_tex = template.render(context)
+
+        # Add ChkTeX directives at the top of the rendered .tex to suppress specific warnings
+        header = "% chktex-file 8\n% chktex-file 44\n\n"
+        rendered_tex = header + rendered_tex
     except jinja2.TemplateError as e:
         print(f"❌ Jinja Error: {e}")
         return
@@ -41,7 +45,7 @@ def generate_pdf_from_template(env, template_name, context, output_dir, output_f
         )
         
         # 4. Cleanup Aux files
-        for ext in [".aux", ".log", ".out", ".tex"]: # Added .tex to cleanup if you want
+        for ext in [".aux", ".log", ".out"]:
             temp_file = os.path.join(output_dir, f"{output_filename}{ext}")
             if os.path.exists(temp_file):
                 os.remove(temp_file)

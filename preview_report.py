@@ -32,7 +32,7 @@ context = {
     # Key Metrics Table Data
     "unique_users": "120",  # Formatted as string for spacing if needed
     "interactions": "230",
-    "sensible_count": 200,
+    "sensible_count": 210,
     "avg_duration": "100 sekund",
     "firm_forms": 5,
     "bday_forms": 0,
@@ -40,6 +40,7 @@ context = {
     # Data for Pie Charts (Keeping these for later sections)
     "num_good": 190,
     "num_bad": 5,
+    "num_neutral": 12,
     # Neutral calculated in template
     
     "topics_text": "Najczęstszymi zapytaniami pozostają te dotyczące rezerwacji oraz promocji.",
