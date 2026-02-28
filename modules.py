@@ -129,6 +129,8 @@ def process_voiceflow_categories(transcripts_list):
                 
                 if val:
                     category_found = str(val).strip()
+                    if category_found == "Możliwość przełożenia lub anulowania rezerwacji":
+                        category_found = "Chęć przełożenia lub anulowania rezerwacji"
                 if reas:
                     reason_found = str(reas).strip()
                 break
