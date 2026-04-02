@@ -12,13 +12,16 @@ class VoiceflowClient:
             "authorization": api_key,
             "content-type": "application/json"
         }
+        self.fmt = "%Y-%m-%dT%H:%M:%S.000Z"
+    
+    def _format_to_utc_string(self, dt):
+        return dt.astimezone(datetime.timezone.utc).strftime(self.fmt)
 
     def get_unique_users__or_interactions(self, start_date, end_date, metric="unique_users"):
         """
         Fetches unique user count or interaction count using Analytics API v2.
         """
         url = "https://analytics-api.voiceflow.com/v2/query/usage"
-        fmt = "%Y-%m-%dT%H:%M:%S.000Z"
         
         # 1. Setup Loop
         all_items = []
@@ -34,8 +37,8 @@ class VoiceflowClient:
                     "filter": {
                         "projectID": self.project_id,
                         "limit": 500,
-                        "startTime": start_date.strftime(fmt),
-                        "endTime": end_date.strftime(fmt)
+                        "startTime": self._format_to_utc_string(start_date),
+                        "endTime": self._format_to_utc_string(end_date)
                     }
                 }
             }
@@ -76,7 +79,6 @@ class VoiceflowClient:
         Handles pagination (take/skip) automatically.
         """
         base_url = f"https://analytics-api.voiceflow.com/v1/transcript/project/{self.project_id}"
-        fmt = "%Y-%m-%dT%H:%M:%S.000Z"
         
         # Pagination settings
         take = 100
@@ -94,8 +96,8 @@ class VoiceflowClient:
             
             # 2. JSON Body for Filtering
             payload = {
-                "startDate": start_date.strftime(fmt),
-                "endDate": end_date.strftime(fmt),
+                "startDate": self._format_to_utc_string(start_date),
+                "endDate": self._format_to_utc_string(end_date),
                 "environmentID": environment_id
             }
 

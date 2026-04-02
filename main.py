@@ -51,9 +51,9 @@ for cat, count in topic_counts.items():
     print(f"   📂 {cat}: {count}")
 
 # --- FETCH CONVOCORE DATA ---
-convo_goodExample_tags = convocore_api.getConvocoreTagsNo(CONVO_API_KEY, CONVO_AGENT_ID, REPORT_START, REPORT_END, "Good Example")
-convo_badExample_tags = convocore_api.getConvocoreTagsNo(CONVO_API_KEY, CONVO_AGENT_ID, REPORT_START, REPORT_END, "Bad Example")
-convo_Neutral_tags = convocore_api.getConvocoreTagsNo(CONVO_API_KEY, CONVO_AGENT_ID, REPORT_START, REPORT_END, "Neutral")
+convo_goodExample_tags, total_convos_started = convocore_api.getConvocoreTagsNo(CONVO_API_KEY, CONVO_AGENT_ID, REPORT_START, REPORT_END, "Good Example")
+convo_badExample_tags, _ = convocore_api.getConvocoreTagsNo(CONVO_API_KEY, CONVO_AGENT_ID, REPORT_START, REPORT_END, "Bad Example")
+convo_Neutral_tags = convocore_api.getConvocoreTagsNo(CONVO_API_KEY, CONVO_AGENT_ID, REPORT_START, REPORT_END, "Neutral")[0]
 
 # --- GENERATE PDF ---
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -73,6 +73,7 @@ context = {
     #"sensible_count": len(sensible_transcripts),       #legacy metric, can be removed if we fully switch to convo tags as proxy for sensible interactions
     "sensible_count": convo_goodExample_tags + convo_badExample_tags + convo_Neutral_tags, # Using convo tags as proxy for sensible interactions
     "avg_duration": config.avg_duration,
+    "total_convos_started": total_convos_started,
     "firm_forms": config.firm_forms,
     "bday_forms": config.bday_forms,
     

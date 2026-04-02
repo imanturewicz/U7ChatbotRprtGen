@@ -65,4 +65,4 @@ def getConvocoreTagsNo(api_key, agent_id, start_date, end_date, target_tag):
         checked_convos += 1
 
     print(f"   -> Found {count} occurrences in {checked_convos} conversations.")
-    return count
+    return count, checked_convos
