@@ -1,7 +1,7 @@
 import requests
 
 class ConvocoreClient:
-    def __init__(self, api_key, base_url="https://na-gcp-api.vg-stuff.com/v3"):
+    def __init__(self, api_key, base_url="https://eu-gcp-api.vg-stuff.com/v3"): #https://na-gcp-api.vg-stuff.com/v3 for NA
         self.base_url = base_url.rstrip('/')
         self.headers = {
             "Authorization": f"Bearer {api_key}",
