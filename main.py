@@ -54,6 +54,7 @@ for cat, count in topic_counts.items():
 convo_goodExample_tags, total_convos_started = convocore_api.getConvocoreTagsNo(CONVO_API_KEY, CONVO_AGENT_ID, REPORT_START, REPORT_END, "Good Example")
 convo_badExample_tags, _ = convocore_api.getConvocoreTagsNo(CONVO_API_KEY, CONVO_AGENT_ID, REPORT_START, REPORT_END, "Bad Example")
 convo_Neutral_tags = convocore_api.getConvocoreTagsNo(CONVO_API_KEY, CONVO_AGENT_ID, REPORT_START, REPORT_END, "Neutral")[0]
+convo_Warm_tags = convocore_api.getConvocoreTagsNo(CONVO_API_KEY, CONVO_AGENT_ID, REPORT_START, REPORT_END, "Warm")[0]
 
 # --- GENERATE PDF ---
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -81,6 +82,7 @@ context = {
     "num_good": convo_goodExample_tags,
     "num_bad": convo_badExample_tags,
     "num_neutral": convo_Neutral_tags,
+    "num_warm": convo_Warm_tags,
     # Neutral calculated in template
     
     "topics_text": config.topics_text,
