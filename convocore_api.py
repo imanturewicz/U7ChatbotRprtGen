@@ -1,3 +1,5 @@
+import time
+
 import requests
 
 class ConvocoreClient:
@@ -9,27 +11,51 @@ class ConvocoreClient:
         }
 
     # API call to fetch a single page of conversations
-    def _fetch_page(self, agent_id, page, limit):
+    def _fetch_page(self, agent_id, limit, cursor=None):
+        time.sleep(10)  # Sleep for 10 seconds to avoid rate limiting
         url = f"{self.base_url}/agents/{agent_id}/convos"
-        params = {"page": page, "limit": limit}
+        params = {"limit": limit}
+        
+        if cursor:
+            params["cursor"] = cursor
+            
         try:
             r = requests.get(url, headers=self.headers, params=params)
             r.raise_for_status()
-            return r.json().get("data", [])
+            response_json = r.json()
+            
+            # Pobranie danych
+            data = response_json.get("data", [])
+            
+            # FIX: Zmiana klucza na camelCase zgodnie z odpowiedzą serwera
+            next_cursor = response_json.get("nextCursor") 
+            
+            return data, next_cursor
+            
         except Exception as e:
-            print(f"❌ [Convocore] Error on page {page}: {e}")
-            return []
+            print(f"❌ [Convocore] Błąd komunikacji (cursor: {cursor}): {e}")
+            return [], None
 
-    def fetch_conversations_generator(self, agent_id, batch_size=100):
-        """Yields conversations one-by-one, handling pagination automatically."""
-        page = 1
+    def fetch_conversations_generator(self, agent_id, batch_size=20):
+        """Yields conversations one-by-one, handling cursor-based pagination."""
+        current_cursor = None
+        
         while True:
-            batch = self._fetch_page(agent_id, page, batch_size)
+            # Rozpakowanie zwracanej krotki (dane, nowy kursor)
+            batch, next_cursor = self._fetch_page(agent_id, limit=batch_size, cursor=current_cursor)
+            
             if not batch:
                 break
+                
             for convo in batch:
                 yield convo
-            page += 1
+                
+            # Jeśli API nie zwraca kolejnego kursora, przerywamy pętlę
+            if not next_cursor:
+                break
+                
+            # Aktualizacja kursora do następnego wywołania
+            current_cursor = next_cursor
 
 def getConvocoreTagsNo(api_key, agent_id, start_date, end_date, target_tag):
     """
